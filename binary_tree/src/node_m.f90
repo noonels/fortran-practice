@@ -1,6 +1,6 @@
 module node_m
     use iso_varying_string, only: &
-            varying_string, assignment(=), operator(//), len, trim, var_str
+        varying_string, assignment(=), operator(//), len, trim, var_str
     use strff, only: join, split_at, NEWLINE
     use tree_m, only: tree_t
 
@@ -14,6 +14,7 @@ module node_m
     contains
         private
         procedure, public :: to_string
+        procedure, public :: total
     end type
 
     interface node_t
@@ -47,12 +48,18 @@ contains
         pipes = join(make_pipe(widths), "")
         allocate(padded_strings, source = pad_to(child_strings, widths, height_))
         blocked = join( &
-                [ dashed_line&
-                , pipes &
-                , concat_lines(padded_strings) &
-                ], &
-                NEWLINE)
+            [ dashed_line&
+            , pipes &
+            , concat_lines(padded_strings) &
+            ], &
+            NEWLINE)
         string = strip_trailing_space(blocked)
+    end function
+
+    pure recursive function total(self)
+        class(node_t), intent(in) :: self
+        integer :: total
+        total = self%left%total() + self%right%total()
     end function
 
     elemental function max_width(tree_string) result(width)
@@ -99,9 +106,9 @@ contains
             dashes = make_pipe(widths(1))
         else
             associate( &
-                    leading_spaces => widths(1)/2 - 1, &
-                    trailing_spaces => widths(size(widths)) - widths(size(widths))/2, &
-                    total_width => sum(widths))
+                leading_spaces => widths(1)/2 - 1, &
+                trailing_spaces => widths(size(widths)) - widths(size(widths))/2, &
+                total_width => sum(widths))
                 associate(dash_width => total_width - leading_spaces - trailing_spaces)
                     dashes = repeat(" ", leading_spaces) // repeat("-", dash_width) // repeat(" ", trailing_spaces)
                 end associate
@@ -137,10 +144,10 @@ contains
         associate(lines => [(split_at(strings(i), NEWLINE), i = 1, size(strings))])
             associate(num_lines => size(lines) / size(strings))
                 joined = join( &
-                        [(join( &
-                                [(lines(i), i = j, num_lines*size(strings), num_lines)] &
-                                , ""), j = 1, num_lines)], &
-                        NEWLINE)
+                    [(join( &
+                    [(lines(i), i = j, num_lines*size(strings), num_lines)] &
+                    , ""), j = 1, num_lines)], &
+                    NEWLINE)
             end associate
         end associate
     end function

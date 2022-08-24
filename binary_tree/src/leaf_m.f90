@@ -13,6 +13,7 @@ module leaf_m
     contains
         private
         procedure, public :: to_string => leaf_to_string
+        procedure, public :: total => leaf_total
     end type
 
     interface leaf_t
@@ -31,5 +32,11 @@ contains
         type(varying_string) :: string
 
         string = to_string(self%value_)
+    end function
+
+    pure function leaf_total(self)
+        class(leaf_t), intent(in) :: self
+        integer :: leaf_total
+        leaf_total = self%value_
     end function
 end module

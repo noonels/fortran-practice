@@ -9,6 +9,7 @@ module tree_m
     contains
         private
         procedure(to_string_i), public, deferred :: to_string
+        procedure(total_i), public, deferred :: total
     end type
 
     abstract interface
@@ -19,6 +20,15 @@ module tree_m
 
             class(tree_t), intent(in) :: self
             type(varying_string) :: string
+        end function
+
+        pure function total_i(self) result(total)
+            import :: tree_t
+
+            implicit none
+
+            class(tree_t), intent(in) :: self
+            integer :: total
         end function
     end interface
 end module
