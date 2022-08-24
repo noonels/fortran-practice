@@ -34,7 +34,7 @@ contains
         string = to_string(self%value_)
     end function
 
-    pure function leaf_total(self)
+    elemental function leaf_total(self)
         class(leaf_t), intent(in) :: self
         integer :: leaf_total
         leaf_total = self%value_

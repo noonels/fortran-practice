@@ -22,7 +22,7 @@ module tree_m
             type(varying_string) :: string
         end function
 
-        pure function total_i(self) result(total)
+        elemental function total_i(self) result(total)
             import :: tree_t
 
             implicit none

@@ -1,8 +1,9 @@
 module node_m
     use iso_varying_string, only: &
-        varying_string, assignment(=), operator(//), len, trim, var_str
+            varying_string, assignment(=), operator(//), len, trim, var_str
     use strff, only: join, split_at, NEWLINE
     use tree_m, only: tree_t
+    use tree_item_m, only: tree_item_t
 
     implicit none
     private
@@ -10,7 +11,7 @@ module node_m
 
     type, extends(tree_t) :: node_t
         private
-        class(tree_t), allocatable :: left, right
+        type(tree_item_t), allocatable :: children(:)
     contains
         private
         procedure, public :: to_string
@@ -21,12 +22,11 @@ module node_m
         module procedure constructor
     end interface
 contains
-    function constructor(left, right) result(node)
-        class(tree_t), intent(in) :: left, right
+    function constructor(children) result(node)
+        type(tree_item_t), intent(in) :: children(:)
         type(node_t) :: node
 
-        allocate(node%left, source = left)
-        allocate(node%right, source = right)
+        allocate(node%children, source = children)
     end function
 
     pure recursive function to_string(self) result(string)
@@ -37,29 +37,31 @@ contains
         type(varying_string), allocatable :: child_strings(:)
         type(varying_string) :: dashed_line
         integer :: height_
+        integer :: i
         type(varying_string), allocatable :: padded_strings(:)
         type(varying_string) :: pipes
         integer, allocatable :: widths(:)
 
-        allocate(child_strings, source = [self%left%to_string(), self%right%to_string()])
+        allocate(child_strings, source = [(self%children(i)%to_string(), i = 1, size(self%children))])
         allocate(widths, source = max_width(child_strings)+1)
         height_ = maxval(height(child_strings))
         dashed_line = make_dashes(widths)
         pipes = join(make_pipe(widths), "")
         allocate(padded_strings, source = pad_to(child_strings, widths, height_))
         blocked = join( &
-            [ dashed_line&
-            , pipes &
-            , concat_lines(padded_strings) &
-            ], &
-            NEWLINE)
+                [ dashed_line&
+                , pipes &
+                , concat_lines(padded_strings) &
+                ], &
+                NEWLINE)
         string = strip_trailing_space(blocked)
     end function
 
-    pure recursive function total(self)
+    elemental recursive function total(self)
         class(node_t), intent(in) :: self
         integer :: total
-        total = self%left%total() + self%right%total()
+
+        total = sum(self%children%total())
     end function
 
     elemental function max_width(tree_string) result(width)
@@ -106,9 +108,9 @@ contains
             dashes = make_pipe(widths(1))
         else
             associate( &
-                leading_spaces => widths(1)/2 - 1, &
-                trailing_spaces => widths(size(widths)) - widths(size(widths))/2, &
-                total_width => sum(widths))
+                    leading_spaces => widths(1)/2 - 1, &
+                    trailing_spaces => widths(size(widths)) - widths(size(widths))/2, &
+                    total_width => sum(widths))
                 associate(dash_width => total_width - leading_spaces - trailing_spaces)
                     dashes = repeat(" ", leading_spaces) // repeat("-", dash_width) // repeat(" ", trailing_spaces)
                 end associate
@@ -144,10 +146,10 @@ contains
         associate(lines => [(split_at(strings(i), NEWLINE), i = 1, size(strings))])
             associate(num_lines => size(lines) / size(strings))
                 joined = join( &
-                    [(join( &
-                    [(lines(i), i = j, num_lines*size(strings), num_lines)] &
-                    , ""), j = 1, num_lines)], &
-                    NEWLINE)
+                        [(join( &
+                                [(lines(i), i = j, num_lines*size(strings), num_lines)] &
+                                , ""), j = 1, num_lines)], &
+                        NEWLINE)
             end associate
         end associate
     end function
