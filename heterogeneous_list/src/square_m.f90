@@ -13,6 +13,7 @@ module square_m
     contains
         private
         procedure, public :: to_string => square_to_string
+        procedure, public :: calculate_area => calculate_area
     end type
 
     interface square_t
@@ -35,5 +36,11 @@ contains
                         // "width = " // to_string(self%width), &
                 4) // NEWLINE &
                 // ")"
+    end function
+
+    pure function calculate_area(self) result(area)
+        class(square_t), intent(in) :: self
+        real :: area
+        area = self%width * self%width
     end function
 end module

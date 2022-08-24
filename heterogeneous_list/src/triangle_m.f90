@@ -14,6 +14,7 @@ module triangle_m
     contains
         private
         procedure, public :: to_string => triangle_to_string
+        procedure, public :: calculate_area => calculate_area
     end type
 
     interface triangle_t
@@ -39,5 +40,11 @@ contains
                         // "height = " // to_string(self%height), &
                 4) // NEWLINE &
                 // ")"
+    end function
+
+    pure function calculate_area(self) result(area)
+        class(triangle_t), intent(in) :: self
+        real :: area
+        area = 0.5 * self%base * self%height
     end function
 end module

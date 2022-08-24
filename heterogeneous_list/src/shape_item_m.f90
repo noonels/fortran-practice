@@ -13,6 +13,7 @@ module shape_item_m
     contains
         private
         procedure, public :: to_string
+        procedure, public :: calculate_area
     end type
 
     interface shape_item_t
@@ -31,9 +32,15 @@ contains
         type(varying_string) :: string
 
         string = hanging_indent( &
-                "shape_item_t(" // NEWLINE &
-                        // "shape = " // self%shape%to_string(), &
-                4) // NEWLINE &
-                // ")"
+            "shape_item_t(" // NEWLINE &
+            // "shape = " // self%shape%to_string(), &
+            4) // NEWLINE &
+            // ")"
+    end function
+
+    elemental function calculate_area(self) result(area)
+        class(shape_item_t), intent(in) :: self
+        real :: area
+        area = self%shape%calculate_area()
     end function
 end module

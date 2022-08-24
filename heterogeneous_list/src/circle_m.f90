@@ -13,6 +13,7 @@ module circle_m
     contains
         private
         procedure, public :: to_string => circle_to_string
+        procedure, public :: calculate_area => calculate_area
     end type
 
     interface circle_t
@@ -35,5 +36,14 @@ contains
                         // "radius = " // to_string(self%radius), &
                 4) // NEWLINE &
                 // ")"
+    end function
+
+    pure function calculate_area(self) result(area)
+        class(circle_t), intent(in) :: self
+        real :: area
+        real :: pi
+
+        pi = 3.1415
+        area = pi * self%radius * self%radius
     end function
 end module

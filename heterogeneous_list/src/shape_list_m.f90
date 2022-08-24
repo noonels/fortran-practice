@@ -13,6 +13,7 @@ module shape_list_m
     contains
         private
         procedure, public :: to_string
+        procedure, public :: total_area
     end type
 
     interface shape_list_t
@@ -31,11 +32,18 @@ contains
         type(varying_string) :: string
 
         string = hanging_indent( &
-                "shape_list_t(" // NEWLINE &
-                        // "shapes = [" // NEWLINE &
-                        // indent(join(self%shapes%to_string(), "," // NEWLINE), 4) // NEWLINE &
-                        // "]", &
-                4) // NEWLINE &
-                // ")"
+            "shape_list_t(" // NEWLINE &
+            // "shapes = [" // NEWLINE &
+            // indent(join(self%shapes%to_string(), "," // NEWLINE), 4) // NEWLINE &
+            // "]", &
+            4) // NEWLINE &
+            // ")"
+    end function
+
+    pure function total_area(self)
+        class(shape_list_t), intent(in) :: self
+        real :: total_area
+
+        total_area = sum(self%shapes%calculate_area())
     end function
 end module

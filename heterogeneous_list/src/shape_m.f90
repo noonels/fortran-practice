@@ -9,6 +9,7 @@ module shape_m
     contains
         private
         procedure(to_string_i), deferred, public :: to_string
+        procedure(calculate_area_i), deferred, public :: calculate_area
     end type
 
     abstract interface
@@ -19,6 +20,15 @@ module shape_m
 
             class(shape_t), intent(in) :: self
             type(varying_string) :: string
+        end function
+
+        pure function calculate_area_i(self) result(area)
+            import :: shape_t
+
+            implicit none
+
+            class(shape_t), intent(in) :: self
+            real :: area
         end function
     end interface
 end module
