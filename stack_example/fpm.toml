@@ -1,0 +1,11 @@
+name = "stack_example"
+license = "MIT"
+author = "Brad Richardson"
+maintainer = "everythingfunctional@protonmail.com"
+copyright = "2021 Brad Richardson"
+
+[dependencies]
+erloff = { git = "https://gitlab.com/everythingfunctional/erloff.git", tag = "v2.0.0" }
+
+[dev-dependencies]
+vegetables = { git = "https://gitlab.com/everythingfunctional/vegetables", tag = "v7.0.2" }
