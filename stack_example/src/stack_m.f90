@@ -8,7 +8,8 @@ module stack_m
 
     type :: stack_t
         private
-        integer, dimension(4096) :: stack
+        integer, allocatable :: items(:)
+        integer :: max_size = 255
         integer :: depth_ = 0
     contains
         private
@@ -32,7 +33,7 @@ module stack_m
 
 
     interface stack_t
-        module procedure stack_constructor
+        module procedure constructor
     end interface
 
     interface fallible_stack_t
@@ -43,9 +44,9 @@ module stack_m
 
     character(len=*), parameter :: MODULE_NAME = "stack_m"
 contains
-    function stack_constructor() result(empty_stack)
+    function constructor() result(empty_stack)
         type(stack_t) :: empty_stack
-
+        allocate(empty_stack%items, source = [integer::])
     end function
 
     function empty(self)
@@ -66,14 +67,13 @@ contains
                 procedure_t("top"), &
                 "Asked for top of an empty stack.")))
         else
-            top = fallible_integer_t(self%stack(self%depth_))
+            top = fallible_integer_t(self%items(1))
         end if
     end function
 
     function pop(self) result(popped)
         class(stack_t), intent(inout) :: self
         type(fallible_stack_t) :: popped
-        integer, dimension(:), allocatable :: tmp
 
         if (self%empty()) then
             popped = fallible_stack_t(error_list_t(fatal_t( &
@@ -81,8 +81,12 @@ contains
                 procedure_t("pop"), &
                 "Attempted to pop an empty stack.")))
         else
-            self%depth_ = self%depth_ - 1
-            popped = fallible_stack_t(self)
+            block
+                type(stack_t) :: tmp
+                tmp%items = self%items(2:)
+                tmp%depth_ = self%depth_ - 1
+                popped = fallible_stack_t(tmp)
+            end block
         end if
     end function
 
@@ -90,11 +94,13 @@ contains
         class(stack_t), intent(inout) :: self
         integer, intent(in) :: top
         type(stack_t) :: pushed
-        integer, dimension(:), allocatable :: tmp
 
-        self%depth_ = self%depth_ + 1
-        self%stack(self%depth_) = top
-        pushed = self
+        pushed%depth_ = self%depth_ + 1
+        if (self%empty()) then
+            allocate(pushed%items, source = [top])
+        else
+            allocate(pushed%items, source = [top, self%items])
+        end if
     end function
 
     function depth(self)
